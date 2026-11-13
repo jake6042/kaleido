@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <title>Kaleido</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@340;400;500&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <canvas id="stage"></canvas>
+    <header>
+      <div class="brand">Kaleido</div>
+      <p id="now">Drop MP3, WAV, FLAC, OGG, M4A, or other audio</p>
+    </header>
+    <div id="dropveil" hidden>Drop to open</div>
+    <div id="toast" hidden></div>
+    <div id="menus">
+      <div id="dock">
+        <div id="dock-chrome">
+          <button id="dock-toggle" type="button" aria-expanded="true">
+            <span class="dock-grab" aria-hidden="true"></span>
+            <span id="dock-toggle-label">Hide</span>
+          </button>
+          <nav id="dock-tabs" aria-label="Controls">
+            <button class="dock-tab is-on" type="button" data-dock="play" aria-pressed="true" aria-controls="menu-play">Play</button>
+            <button class="dock-tab" type="button" data-dock="look" aria-pressed="false" aria-controls="menu-look">Look</button>
+            <button class="dock-tab" type="button" data-dock="export" aria-pressed="false" aria-controls="menu-export">Export</button>
+          </nav>
+        </div>
+        <div id="dock-sheet">
+      <section class="menu" id="menu-play" data-menu="play">
+        <div class="menu-bar">
+          <button class="menu-toggle" type="button" aria-expanded="true" aria-controls="play-body">Playback</button>
+        </div>
+        <div class="menu-body" id="play-body">
+          <div class="row transport dock-keep">
+            <button id="open" type="button">Open</button>
+            <button id="play" type="button" disabled>Play</button>
+            <button id="stop" type="button" disabled title="Stop and return to the start">Stop</button>
+            <button id="mute" type="button" title="Mute">Mute</button>
+            <button id="full" type="button">Full screen</button>
+            <label class="vol">Vol <input id="volume" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volume" /></label>
+          </div>
+          <div class="row timeline dock-keep">
+            <span id="elapsed">0:00</span>
+            <div class="seekwrap">
+              <canvas id="wave" width="640" height="36"></canvas>
+              <div id="playhead" hidden></div>
+              <div id="crop" hidden>
+                <div id="crop-before"></div>
+                <div id="crop-after"></div>
+                <button id="crop-in" class="mark" type="button" aria-label="Drag export start"></button>
+                <button id="crop-out" class="mark" type="button" aria-label="Drag export end"></button>
+              </div>
+              <input id="seek" type="range" min="0" max="0" value="0" step="0.01" disabled aria-label="Seek" />
+            </div>
+            <span id="total">0:00</span>
+          </div>
+          <div class="row range">
+            <span id="span" title="Export range">0:00–0:00</span>
+            <button id="mark-in" type="button" disabled title="Set export start at the playhead (I)">In</button>
+            <button id="mark-out" type="button" disabled title="Set export end at the playhead (O)">Out</button>
+            <button id="goto-in" type="button" disabled>Go to in</button>
+            <button id="goto-out" type="button" disabled>Go to out</button>
+            <button id="preview" type="button" disabled title="Play from the in point to the out point, once">Preview</button>
+            <button id="loop" type="button" disabled aria-pressed="false" title="Repeat the marked span">Loop</button>
+            <button id="reset-range" type="button" disabled>Reset</button>
+          </div>
+          <p class="hint hint-keys">Drag the pink and aqua marks, or press I and O, to set the export span. Arrow keys move the playhead. H hides the panels.</p>
+          <p class="hint hint-touch">Drag the pink and aqua marks to set the export span. Hide keeps play and the timeline on screen.</p>
+        </div>
+        <button class="menu-resize" type="button" aria-label="Resize Playback"></button>
+      </section>
+      <section class="menu" id="menu-look" data-menu="look">
+        <div class="menu-bar">
+          <button class="menu-toggle" type="button" aria-expanded="true" aria-controls="look-body">Look</button>
+        </div>
+        <div class="menu-body" id="look-body">
+          <div class="row look-tools">
+            <label>
+              Look
+              <select id="look" aria-label="Look"></select>
+            </label>
+            <button id="savelook" type="button">Save look</button>
+            <button id="deletelook" type="button" disabled>Delete</button>
+            <button id="reset-look" type="button">Reset</button>
+          </div>
+          <div class="row name-row" id="look-name-row" hidden>
+            <input id="look-name" type="text" maxlength="40" placeholder="Look name" aria-label="Look name" />
+            <button id="look-name-save" type="button">Save</button>
+            <button id="look-name-cancel" type="button">Cancel</button>
+          </div>
+          <div class="row look-picks">
+            <label>
+              Mode
+              <select id="mode" aria-label="Mode">
+                <option value="mandala" selected>Mandala</option>
+                <option value="tunnel">Tunnel</option>
+                <option value="liquid">Liquid</option>
+                <option value="starfield">Starfield</option>
+                <option value="halo">Halo</option>
+                <option value="weave">Weave</option>
+              </select>
+            </label>
+            <label>
+              Palette
+              <select id="palette" aria-label="Palette">
+                <option value="0">Acid</option>
+                <option value="1">Aurora</option>
+                <option value="2">Magma</option>
+                <option value="3">Void</option>
+                <option value="4">Tide</option>
+                <option value="5">Bloom</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <label title="Which part of the song moves the picture">
+              Follow
+              <select id="follow" aria-label="Follow">
+                <option value="all" selected>Whole song</option>
+                <option value="low">Bass</option>
+                <option value="high">Treble</option>
+              </select>
+            </label>
+          </div>
+          <div class="palette-picks">
+            <label class="pick">Color <input id="pal-a" type="color" value="#e241fb" aria-label="Palette color" /></label>
+            <label class="pick">Mid <input id="pal-b" type="color" value="#fb4151" aria-label="Palette mid color" /></label>
+            <label class="pick">Accent <input id="pal-c" type="color" value="#e1fc73" aria-label="Palette accent" /></label>
+          </div>
+          <div id="palette-custom" class="palette-custom" hidden>
+            <div id="palette-swatch" class="palette-swatch" aria-hidden="true"></div>
+            <label><span>Hue</span><input id="pal-hue" type="range" min="0" max="360" step="1" value="292" aria-label="Palette hue" /><em id="pal-hue-val">292</em></label>
+            <label><span>Span</span><input id="pal-span" type="range" min="0" max="360" step="1" value="140" aria-label="Palette span" /><em id="pal-span-val">140</em></label>
+            <label><span>Sat</span><input id="pal-sat" type="range" min="0" max="100" step="1" value="96" aria-label="Palette saturation" /><em id="pal-sat-val">96</em></label>
+            <label><span>Light</span><input id="pal-light" type="range" min="28" max="82" step="1" value="62" aria-label="Palette lightness" /><em id="pal-light-val">62</em></label>
+            <div class="row">
+              <button id="savepalette" type="button">Save palette</button>
+              <button id="deletepalette" type="button" disabled>Delete</button>
+            </div>
+            <div class="row name-row" id="palette-name-row" hidden>
+              <input id="palette-name" type="text" maxlength="40" placeholder="Palette name" aria-label="Palette name" />
+              <button id="palette-name-save" type="button">Save</button>
+              <button id="palette-name-cancel" type="button">Cancel</button>
+            </div>
+          </div>
+          <label><span>Symmetry</span><input id="symmetry" type="range" min="4" max="16" step="1" value="8" /><em id="symval">8</em></label>
+          <label><span>Smear</span><input id="smear" type="range" min="0" max="1" step="0.01" value="0.68" aria-label="Smear" /><em id="smearval">0.68</em></label>
+          <label><span>Intensity</span><input id="intensity" type="range" min="0.5" max="1.8" step="0.01" value="1.1" aria-label="Intensity" /><em id="intensityval">1.1</em></label>
+        </div>
+        <button class="menu-resize" type="button" aria-label="Resize Look"></button>
+      </section>
+      <section class="menu" id="menu-export" data-menu="export">
+        <div class="menu-bar">
+          <button class="menu-toggle" type="button" aria-expanded="true" aria-controls="export-body">Export</button>
+        </div>
+        <div class="menu-body" id="export-body">
+          <p id="export-meta" class="hint">0:00 · 0 frames</p>
+          <p id="export-whole" class="hint" hidden>The whole track is selected. Drag the marks on the timeline to export a section.</p>
+          <p class="hint">Needs Chrome or Edge. The video fades in and out, and shows the Kaleido title and the file name. The panels stay off the video.</p>
+          <label>
+            Size
+            <select id="resolution" aria-label="Export size">
+              <option value="1280x720" selected>16:9 · 720p</option>
+              <option value="1920x1080">16:9 · 1080p</option>
+              <option value="1080x1920">9:16 · 1080×1920</option>
+              <option value="1080x1080">1:1 · 1080×1080</option>
+            </select>
+          </label>
+          <button id="save" class="primary" type="button" disabled>Save MP4</button>
+        </div>
+        <button class="menu-resize" type="button" aria-label="Resize Export"></button>
+      </section>
+        </div>
+      </div>
+    </div>
+    <div id="exporting" hidden>
+      <div class="sheet">
+        <h2>Rendering MP4</h2>
+        <div class="meter"><div id="meterbar"></div></div>
+        <p id="meterlabel">Preparing</p>
+        <button id="cancel" type="button">Cancel</button>
+      </div>
+    </div>
+    <input id="file" type="file" accept="audio/*,video/mp4,.mp3,.wav,.wave,.ogg,.oga,.flac,.m4a,.aac,.webm,.opus,.aiff,.aif" hidden />
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

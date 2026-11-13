@@ -1,0 +1,24 @@
+# Dependencies and build output
+node_modules
+dist
+
+# Local audio and video used for testing (copyrighted material stays off GitHub)
+test/
+*.mp3
+*.wav
+*.flac
+*.ogg
+*.m4a
+*.mp4
+
+# Secrets
+.env
+.env.*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+.claude/
